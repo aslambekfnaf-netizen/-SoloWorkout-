@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SYSTEM // SOLO WORKOUT</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #070b14;
+      --panel: rgba(12, 22, 42, 0.9);
+      --border: #2563eb;
+      --glow: rgba(59, 130, 246, 0.45);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --gold: #facc15;
+      --danger: #f87171;
+      --ok: #4ade80;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+    body {
+      background: radial-gradient(circle at top, #0f1f3d 0%, var(--bg) 70%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .system-window {
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 0 24px var(--glow), inset 0 0 16px rgba(37, 99, 235, 0.2);
+      padding: 16px;
+    }
+
+    .header {
+      text-align: center;
+      border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+
+    .sys-tag {
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      color: var(--accent);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .player-name {
+      font-size: 20px;
+      font-weight: 800;
+      margin-top: 4px;
+      color: #fff;
+    }
+
+    .title-badge {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(250, 204, 21, 0.14);
+      border: 1px solid rgba(250, 204, 21, 0.5);
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .streak-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      font-size: 14px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--accent);
+      margin: 14px 0 8px;
+      font-weight: 700;
+    }
+
+    .stat-card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+
+    .stat-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .rank-pill {
+      background: rgba(56, 189, 248, 0.18);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .bar-bg {
+      width: 100%;
+      height: 8px;
+      background: #1e293b;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2563eb, #38bdf8);
+      transition: width 0.25s ease;
+    }
+
+    .quest-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .quick-log {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 9px;
+      padding: 10px 12px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: transform 0.1s ease, opacity 0.15s ease;
+    }
+
+    button:active { transform: scale(0.98); }
+
+    .btn-ex {
+      background: rgba(37, 99, 235, 0.25);
+      border: 1px solid rgba(59, 130, 246, 0.6);
+      color: #fff;
+    }
+
+    .btn-send {
+      width: 100%;
+      margin-top: 14px;
+      padding: 12px;
+      background: linear-gradient(90deg, #1d4ed8, #0284c7);
+      color: #fff;
+      font-size: 14px;
+      box-shadow: 0 0 14px rgba(2, 132, 199, 0.45);
+    }
+
+    .note {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="system-window">
+    <div class="header">
+      <div class="sys-tag">[ СТАТУС СИСТЕМЫ ]</div>
+      <div class="player-name" id="pName">Игрок</div>
+      <div class="title-badge" id="pTitle">Червяк 🪱</div>
+    </div>
+
+    <div class="streak-box">
+      <span>🔥 Стрик: <strong id="pStreak">0</strong> дн.</span>
+      <span style="color: var(--ok);">Бонус XP: +<strong id="pBonus">0</strong>%</span>
+    </div>
+
+    <div class="section-title">Характеристики</div>
+    <div id="statsContainer"></div>
+
+    <div class="section-title">Цели квеста</div>
+    <div id="questsContainer"></div>
+
+    <div class="section-title">Быстрая запись тренировки</div>
+    <div class="quick-log">
+      <button class="btn-ex" onclick="addReps('pushups', 10)">💪 +10 Отжимания</button>
+      <button class="btn-ex" onclick="addReps('pullups', 5)">🧗 +5 Подтягивания</button>
+      <button class="btn-ex" onclick="addReps('crunches', 15)">🤸 +15 Скручивания</button>
+      <button class="btn-ex" onclick="addReps('squats', 15)">🦵 +15 Приседания</button>
+      <button class="btn-ex" style="grid-column: span 2;" onclick="addRun(600)">🏃 +10 мин Бег</button>
+    </div>
+
+    <button class="btn-send" onclick="sendToBot()">📤 Отправить прогресс в бота</button>
+    <div class="note" id="gateHint">
+      Гейты: SSS требует ≥75% всех целей, ранг X — 100% всех целей.
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    const RANKS = ["F", "E", "D", "C", "B", "A", "S", "SS", "SSS", "X"];
+
+    const defaultState = {
+      name: tg?.initDataUnsafe?.user?.first_name || "Игрок",
+      streak: 0,
+      stat_str: "F", exp_str: 0,
+      stat_spd: "F", exp_spd: 0,
+      stat_end: "F", exp_end: 0,
+      stat_agi: "F", exp_agi: 0,
+      pushups_cur: 0, pushups_target: 30,
+      crunches_cur: 0, crunches_target: 50,
+      pullups_cur: 0, pullups_target: 10,
+      squats_cur: 0, squats_target: 40,
+      run_cur_sec: 0, run_target_sec: 1800,
+      pending_logs: []
+    };
+
+    function loadState() {
+      const params = new URLSearchParams(window.location.search);
+      const rawData = params.get("data");
+      if (rawData) {
+        try {
+          const parsed = JSON.parse(decodeURIComponent(rawData));
+          return { ...defaultState, ...parsed, pending_logs: [] };
+        } catch (e) {}
+      }
+      const saved = localStorage.getItem("solo_workout_state");
+      if (saved) {
+        try { return { ...defaultState, ...JSON.parse(saved) }; } catch (e) {}
+      }
+      return { ...defaultState };
+    }
+
+    let state = loadState();
+
+    function saveLocal() {
+      localStorage.setItem("solo_workout_state", JSON.stringify(state));
+    }
+
+    function reqExp(rank) {
+      const idx = RANKS.indexOf(rank);
+      return ((idx >= 0 ? idx : 0) + 1) * 100;
+    }
+
+    function fmtTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m}м ${s}с`;
+    }
+
+    function goalsRatio(ratio) {
+      return (
+        state.pushups_cur >= state.pushups_target * ratio &&
+        state.crunches_cur >= state.crunches_target * ratio &&
+        state.pullups_cur >= state.pullups_target * ratio &&
+        state.squats_cur >= state.squats_target * ratio &&
+        state.run_cur_sec >= state.run_target_sec * ratio
+      );
+    }
+
+    function getTitle() {
+      const ranks = [state.stat_str, state.stat_spd, state.stat_end, state.stat_agi];
+      const minIdx = Math.min(...ranks.map(r => Math.max(0, RANKS.indexOf(r))));
+      const lowest = RANKS[minIdx];
+      const p75 = goalsRatio(0.75);
+
+      const map = {
+        "F": "Червяк 🪱",
+        "E": "Малыш 👶",
+        "D": "Пацан 🧒",
+        "C": "Дохляк 🧍",
+        "B": "Новичок 🏃",
+        "A": "Крутой 🤌",
+        "S": "Зверь 🦁",
+        "SS": "Воин 🏋️",
+        "SSS": p75 ? "1 на миллиард 😎" : "Воин духа 🛡️",
+        "X": "Монарх тренировок 💀"
+      };
+      return map[lowest] || "Червяк 🪱";
+    }
+
+    function applyExp(code, amount) {
+      const rKey = "stat_" + code;
+      const eKey = "exp_" + code;
+      if (state[rKey] === "X") return;
+
+      state[eKey] += amount;
+      let need = reqExp(state[rKey]);
+
+      while (state[eKey] >= need && state[rKey] !== "X") {
+        const nextIdx = RANKS.indexOf(state[rKey]) + 1;
+        const nextRank = RANKS[nextIdx];
+
+        if (nextRank === "SSS" && !goalsRatio(0.75)) {
+          state[eKey] = need - 1;
+          break;
+        }
+        if (nextRank === "X" && !goalsRatio(1.0)) {
+          state[eKey] = need - 1;
+          break;
+        }
+
+        state[eKey] -= need;
+        state[rKey] = nextRank;
+        need = reqExp(state[rKey]);
+      }
+    }
+
+    function addReps(type, reps) {
+      const mult = 1 + (state.streak || 1) * 0.05;
+      const total = reps * 2 * mult;
+      const dist = {
+        pushups: ["pushups_cur", 0.50, 0.15, 0.20, 0.15],
+        pullups: ["pullups_cur", 0.30, 0.15, 0.40, 0.15],
+        crunches: ["crunches_cur", 0.15, 0.15, 0.40, 0.30],
+        squats: ["squats_cur", 0.15, 0.15, 0.40, 0.30]
+      }[type];
+
+      state[dist[0]] += reps;
+      applyExp("str", total * dist[1]);
+      applyExp("spd", total * dist[2]);
+      applyExp("end", total * dist[3]);
+      applyExp("agi", total * dist[4]);
+
+      state.pending_logs.push({ type, value: reps });
+      saveLocal();
+      render();
+    }
+
+    function addRun(sec) {
+      const mult = 1 + (state.streak || 1) * 0.05;
+      const total = sec * 0.5 * mult;
+      state.run_cur_sec += sec;
+      applyExp("str", total * 0.05);
+      applyExp("spd", total * 0.40);
+      applyExp("end", total * 0.40);
+      applyExp("agi", total * 0.15);
+
+      state.pending_logs.push({ type: "run", value: sec });
+      saveLocal();
+      render();
+    }
+
+    function render() {
+      document.getElementById("pName").textContent = state.name;
+      document.getElementById("pTitle").textContent = getTitle();
+      document.getElementById("pStreak").textContent = state.streak;
+      document.getElementById("pBonus").textContent = state.streak * 5;
+
+      const stats = [
+        ["💪 Сила", "stat_str", "exp_str"],
+        ["⚡ Скорость", "stat_spd", "exp_spd"],
+        ["🫀 Выносливость", "stat_end", "exp_end"],
+        ["🤸 Ловкость", "stat_agi", "exp_agi"]
+      ];
+
+      document.getElementById("statsContainer").innerHTML = stats.map(([label, rK, eK]) => {
+        const rank = state[rK];
+        const exp = Math.floor(state[eK]);
+        const need = reqExp(rank);
+        const pct = rank === "X" ? 100 : Math.min(100, Math.round((exp / need) * 100));
+        return `
+          <div class="stat-card">
+            <div class="stat-top">
+              <span>${label}</span>
+              <span class="rank-pill">${rank}</span>
+            </div>
+            <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+            <div style="font-size:11px; color:var(--muted); margin-top:4px;">${rank === "X" ? "MAX" : `${exp} / ${need} XP`}</div>
+          </div>
+        `;
+      }).join("");
+
+      const quests = [
+        ["Отжимания", `${state.pushups_cur} / ${state.pushups_target}`],
+        ["Скручивания", `${state.crunches_cur} / ${state.crunches_target}`],
+        ["Подтягивания", `${state.pullups_cur} / ${state.pullups_target}`],
+        ["Приседания", `${state.squats_cur} / ${state.squats_target}`],
+        ["🏃 Бег", `${fmtTime(state.run_cur_sec)} / ${fmtTime(state.run_target_sec)}`]
+      ];
+
+      document.getElementById("questsContainer").innerHTML = quests.map(([name, val]) => `
+        <div class="quest-item">
+          <span>${name}</span>
+          <strong>${val}</strong>
+        </div>
+      `).join("");
+    }
+
+    function sendToBot() {
+      const payload = JSON.stringify({
+        action: "sync_workout",
+        logs: state.pending_logs
+      });
+      if (tg && tg.sendData) {
+        tg.sendData(payload);
+        state.pending_logs = [];
+        saveLocal();
+      } else {
+        alert("Откройте Mini App внутри Telegram, чтобы отправить данные боту.");
+      }
+    }
+
+    render();
+  </script>
+</body>
+  </html>
+  
